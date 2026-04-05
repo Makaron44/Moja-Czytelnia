@@ -39,3 +39,11 @@ export async function updateBookStatus(id, status) {
 export async function getBookNotes(bookId) {
   return await db.notes.where('bookId').equals(bookId).reverse().sortBy('date');
 }
+
+export async function deleteNote(id) {
+  return await db.notes.delete(id);
+}
+
+export async function updateNoteText(id, content, page, tags) {
+  return await db.notes.update(id, { content, page, tags });
+}

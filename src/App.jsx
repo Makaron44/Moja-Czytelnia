@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLiveQuery } from 'dexie-react-hooks';
-import { db, addBook, updateBookProgress, addNote, updateBookStatus } from './db';
+import { db, addBook, updateBookProgress, addNote, updateBookStatus, deleteNote, updateNoteText } from './db';
 import { Plus, BookOpen, Quote, ChevronLeft, Camera, Settings, Database, MoreVertical, Trash2, PenLine, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import CoverGenerator from './components/CoverGenerator';
@@ -50,13 +50,24 @@ const App = () => {
   const handleSaveManualNote = async (e) => {
     e.preventDefault();
     if (!manualNote.content) return;
-    await addNote({
-      bookId: selectedBookId,
-      content: manualNote.content,
-      page: parseInt(manualNote.page) || selectedBook.currentPage,
-      tags: manualNote.tags,
-      type: 'note'
-    });
+    
+    if (manualNote.id) {
+      await updateNoteText(
+        manualNote.id, 
+        manualNote.content, 
+        parseInt(manualNote.page) || selectedBook.currentPage, 
+        manualNote.tags
+      );
+    } else {
+      await addNote({
+        bookId: selectedBookId,
+        content: manualNote.content,
+        page: parseInt(manualNote.page) || selectedBook.currentPage,
+        tags: manualNote.tags,
+        type: 'note'
+      });
+    }
+    
     setManualNote({ content: '', page: '', tags: '' });
     setShowNoteModal(false);
   };
@@ -258,7 +269,16 @@ const App = () => {
                 <div key={note.id} className="card" style={{ background: 'var(--bg-primary)', border: 'none' }}>
                   <div className="flex-between" style={{ marginBottom: '8px' }}>
                     <span style={{ fontSize: '12px', opacity: 0.5, fontWeight: 600 }}>STR. {note.page}</span>
-                    <span style={{ fontSize: '11px', opacity: 0.4 }}>{new Date(note.date).toLocaleDateString('pl-PL')}</span>
+                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+                      <span style={{ fontSize: '11px', opacity: 0.4 }}>{new Date(note.date).toLocaleDateString('pl-PL')}</span>
+                      <button onClick={() => {
+                        setManualNote({ id: note.id, content: note.content, page: note.page, tags: note.tags || '' });
+                        setShowNoteModal(true);
+                      }}><PenLine size={14} style={{opacity:0.5}}/></button>
+                      <button onClick={async () => {
+                        if (confirm('Na pewno chcesz usunąć tę notatkę?')) await deleteNote(note.id);
+                      }}><Trash2 size={14} style={{opacity:0.5}}/></button>
+                    </div>
                   </div>
                   <p className="serif" style={{ fontSize: '17px', lineHeight: 1.5, color: 'var(--text-primary)' }}>
                     "{note.content}"

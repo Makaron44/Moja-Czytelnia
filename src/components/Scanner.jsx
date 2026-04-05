@@ -42,12 +42,25 @@ const Scanner = ({ bookId, onClose, currentPage = 0 }) => {
   const capturePhoto = () => {
     const video = videoRef.current;
     const canvas = canvasRef.current;
-    if (video && canvas) {
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
+    if (video && canvas && video.videoWidth > 0) {
+      // Calculate crop area based on visually drawn rectangle (80% width, 30% height centered)
+      const cropWidth = video.videoWidth * 0.8;
+      const cropHeight = video.videoHeight * 0.3;
+      const startX = (video.videoWidth - cropWidth) / 2;
+      const startY = (video.videoHeight - cropHeight) / 2;
+
+      canvas.width = cropWidth;
+      canvas.height = cropHeight;
       const ctx = canvas.getContext('2d');
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      setCapturedImage(canvas.toDataURL('image/jpeg'));
+      
+      // Draw only the cropped portion from the video stream
+      ctx.drawImage(
+        video,
+        startX, startY, cropWidth, cropHeight, // source rect
+        0, 0, cropWidth, cropHeight // destination rect
+      );
+      
+      setCapturedImage(canvas.toDataURL('image/jpeg', 0.9));
       setStep('preview');
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
@@ -152,7 +165,7 @@ const Scanner = ({ bookId, onClose, currentPage = 0 }) => {
 
         {step === 'preview' && (
           <div style={{ width: '100%', height: '100%', background: '#000', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-            <img src={capturedImage} style={{ maxWidth: '100%', maxHeight: '70%', borderRadius: '12px' }} />
+            <img src={capturedImage} style={{ width: '80%', borderRadius: '8px', border: '2px solid white' }} />
             <div style={{ marginTop: '40px', display: 'flex', gap: '20px' }}>
               <button 
                 className="card" 
