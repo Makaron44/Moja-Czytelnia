@@ -10,6 +10,7 @@ const App = () => {
   const [view, setView] = useState('shelf'); // 'shelf', 'details', 'scanner'
   const [selectedBookId, setSelectedBookId] = useState(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [addError, setAddError] = useState('');
   const [newBook, setNewBook] = useState({ title: '', author: '', totalPages: '' });
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [manualNote, setManualNote] = useState({ content: '', page: '', tags: '' });
@@ -27,7 +28,11 @@ const App = () => {
 
   const handleAddBook = async (e) => {
     e.preventDefault();
-    if (!newBook.title || !newBook.totalPages) return;
+    if (!newBook.title || !newBook.author || !newBook.totalPages) {
+      setAddError('Nie tak szybko! Wymagamy tytułu, autora i liczby stron.');
+      return;
+    }
+    setAddError('');
     await addBook({
       ...newBook,
       totalPages: parseInt(newBook.totalPages),
@@ -475,7 +480,10 @@ const App = () => {
               zIndex: 1000,
               padding: '20px'
             }}
-            onClick={() => setShowAddModal(false)}
+            onClick={() => {
+              setShowAddModal(false);
+              setAddError('');
+            }}
           >
             <motion.div
               initial={{ scale: 0.9, y: 20 }}
@@ -519,6 +527,15 @@ const App = () => {
                     placeholder="np. 350"
                   />
                 </div>
+                {addError && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: -5 }} 
+                    animate={{ opacity: 1, y: 0 }} 
+                    style={{ color: '#ef4444', fontSize: '13px', marginBottom: '16px', textAlign: 'center', fontWeight: '500' }}
+                  >
+                    {addError}
+                  </motion.div>
+                )}
                 <button 
                   type="submit"
                   className="card" 
