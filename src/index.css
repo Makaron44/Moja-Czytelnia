@@ -64,6 +64,12 @@ button {
 input, textarea {
   font-family: inherit;
   font-size: 16px; /* Prevents zoom on iOS */
+  color: var(--text-primary);
+}
+
+input::placeholder, textarea::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.7;
 }
 
 .glass {
