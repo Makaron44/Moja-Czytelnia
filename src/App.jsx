@@ -158,7 +158,7 @@ const App = () => {
                       setSelectedBookId(book.id);
                       setView('details');
                     }}
-                    style={{ padding: '12px', cursor: 'pointer' }}
+                    style={{ padding: '12px', cursor: 'pointer', minWidth: 0 }}
                   >
                     <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '12px' }}>
                       <CoverGenerator title={book.title} author={book.author} size="md" />
